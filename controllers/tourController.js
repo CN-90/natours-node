@@ -1,6 +1,7 @@
 const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 // Middleware to validate body...
 // exports.validateBody = (req, res, next) => {
@@ -43,9 +44,16 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 exports.getTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.id);
   // Tour.findOne({_id: req.params.id})
+
+  if (!tour) {
+    return next(new AppError('No tour found with that ID', 404));
+  }
+
   res.status(200).json({
     status: 'success',
-    tour
+    data: {
+      tour
+    }
   });
 });
 
@@ -62,23 +70,32 @@ exports.createTour = catchAsync(async (req, res, next) => {
 
 // Update an existing tour
 exports.updateTour = catchAsync(async (req, res, next) => {
-  const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true // This will ensure the validators are run on update from the inital schema.
   });
+
+  if (!tour) {
+    return next(new AppError('No tour found with that ID', 404));
+  }
   res.status(200).json({
     status: 'success',
     data: {
-      updatedTour
+      tour
     }
   });
 });
 
 // Delete tour
 exports.deleteTour = catchAsync(async (req, res, next) => {
-  await Tour.findByIdAndDelete(req.params.id);
+  const tour = await Tour.findByIdAndDelete(req.params.id);
+
+  if (!tour) {
+    return next(new AppError('No tour found with that ID', 404));
+  }
   res.status(204).json({
-    status: 'Tour deleted successfully'
+    status: 'Tour deleted successfully',
+    data: null
   });
 });
 

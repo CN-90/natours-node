@@ -11,11 +11,11 @@ const toursSchema = new mongoose.Schema(
       trim: true,
       maxlength: [
         40,
-        'A tour name must have less than or equal to 40 characters.'
+        'A tour name must have less than or equal to 40 characters'
       ],
       minlength: [
         10,
-        'A tour name must have more than or equal to 10 characters.'
+        'A tour name must have more than or equal to 10 characters'
       ],
       validate: {
         // [validators.isAlpha, 'Tour name must contain only letters.']
@@ -28,7 +28,7 @@ const toursSchema = new mongoose.Schema(
     slug: String,
     duration: {
       type: Number,
-      required: [true, 'A tour must have a duration.']
+      required: [true, 'A tour must have a duration']
     },
     maxGroupSize: {
       type: Number,
@@ -39,7 +39,7 @@ const toursSchema = new mongoose.Schema(
       required: [true, 'A tour must have a difficulty'],
       enum: {
         values: ['easy', 'medium', 'difficult'],
-        message: 'Difficulty is either: easy, medium or difficult.'
+        message: 'Difficulty is either: easy, medium or difficult'
       }
     },
     ratingsAverage: {
@@ -54,7 +54,7 @@ const toursSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: [true, 'A tour must have a price.']
+      required: [true, 'A tour must have a price']
     },
     priceDiscount: {
       type: Number,
@@ -64,7 +64,7 @@ const toursSchema = new mongoose.Schema(
           // THIS only points to current doc on NEW document and not update.
           return discount < this.price;
         },
-        message: `Discount price {VALUE} cannot be higher than price ${this.price}.`
+        message: `Discount price {VALUE} cannot be higher than price ${this.price}`
       }
     },
     summary: {
@@ -78,7 +78,7 @@ const toursSchema = new mongoose.Schema(
     },
     imageCover: {
       type: String,
-      required: [true, 'A tour must have a cover image.']
+      required: [true, 'A tour must have a cover image']
     },
     images: [String],
     createdAt: {

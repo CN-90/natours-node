@@ -29,7 +29,7 @@ app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on the server.`, 404));
 });
 
-// error handling middware.
+// error handling middware receives four arguments err, res, req, next
 app.use(globalErrorHandler);
 
 // START SERVER

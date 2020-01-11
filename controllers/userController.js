@@ -16,7 +16,7 @@ exports.getUser = (req, res) => {
 
 // creates a new user and saves to database.
 exports.createUser = (req, res) => {
-  res.status(500).json({
+  User.res.status(500).json({
     status: 'Error',
     message: 'This route is not defined.'
   });
