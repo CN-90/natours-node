@@ -1,10 +1,20 @@
+const User = require('../models/userModel');
+const catchAsync = require('../utils/catchAsync');
+// const APIFeatures = require('../utils/apiFeatures');
+// const AppError = require('../utils/appError');
+
 // get all users in database
-exports.getAllUsers = (req, res) => {
-  res.status(500).json({
-    status: 'Error',
-    message: 'This route is not defined.'
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+  const users = await User.find();
+
+  res.status(200).json({
+    status: 'success',
+    results: users.length,
+    data: {
+      users
+    }
   });
-};
+});
 
 // get a single user depending on id
 exports.getUser = (req, res) => {
@@ -16,7 +26,7 @@ exports.getUser = (req, res) => {
 
 // creates a new user and saves to database.
 exports.createUser = (req, res) => {
-  User.res.status(500).json({
+  res.status(500).json({
     status: 'Error',
     message: 'This route is not defined.'
   });
