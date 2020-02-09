@@ -26,7 +26,7 @@ const usersSchema = new mongoose.Schema({
     type: String,
     required: [true, 'A password is required'],
     minLength: [8, 'Password must be 8 characters or more.'],
-    select: false
+    select: false // select ensures the field is not returned when making a query unless specified with .select('+password')
   },
   passwordConfirm: {
     type: String,
@@ -41,7 +41,12 @@ const usersSchema = new mongoose.Schema({
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
-  passwordResetExpires: Date
+  passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false
+  }
 });
 
 // Encrypt password before it is saved.
@@ -53,6 +58,13 @@ usersSchema.pre('save', async function(next) {
   this.password = await bcrypt.hash(this.password, 12);
   // remove password confirm field.
   this.passwordConfirm = undefined;
+  next();
+});
+
+// only returns users where active is not equal ($ne) to false.
+usersSchema.pre(/^find/, function(next) {
+  // this points to the current query
+  this.find({ active: { $ne: false } });
   next();
 });
 
