@@ -90,7 +90,32 @@ const toursSchema = new mongoose.Schema(
     secretTour: {
       type: Boolean,
       default: false
-    }
+    },
+    startLocation: {
+      // GeoJSON
+      type: {
+        type: String,
+        default: 'Point',
+        enums: ['Point']
+      },
+      coordinates: [Number],
+      address: String,
+      description: String
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point']
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number
+      }
+    ],
+    guides: [{ type: mongoose.Schema.ObjectId, ref: 'User' }]
   },
   {
     toJSON: { virtuals: true },
@@ -109,6 +134,15 @@ toursSchema.pre('save', function(next) {
   next();
 });
 
+// // add users as embedded documents.
+// toursSchema.pre('save', async function(next) {
+//   const guidesPromises = this.guides.map(
+//     async userId => await User.findById(userId)
+//   );
+//   this.guides = await Promise.all(guidesPromises);
+//   next();
+// });
+
 // QUERY MIDDLWARE regex for all routes that begin with find.
 toursSchema.pre(/^find/, function(next) {
   this.find({ secretTour: { $ne: true } });
@@ -116,9 +150,11 @@ toursSchema.pre(/^find/, function(next) {
   next();
 });
 
-toursSchema.post(/^find/, function(docs, next) {
-  console.log(`Query took ${Date.now() - this.start} milliseconds`);
-  //   console.log(docs);
+toursSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt'
+  });
   next();
 });
 
@@ -127,6 +163,12 @@ toursSchema.pre('aggregate', function(next) {
   this.pipeline().unshift({
     $match: { secretTour: { $ne: true } }
   });
+  next();
+});
+
+toursSchema.post(/^find/, function(docs, next) {
+  console.log(`Query took ${Date.now() - this.start} milliseconds`);
+  //   console.log(docs);
   next();
 });
 
