@@ -49,6 +49,7 @@ exports.logIn = catchAsync(async (req, res, next) => {
   if (!email || !password) {
     return next(new AppError('Please provide email and password.', 400));
   }
+
   // 2) check if user exists && password is correct
   const user = await User.findOne({ email }).select('+password');
   // created this method on the user schema to compare passwords using bcrypt.
