@@ -1,8 +1,11 @@
 const express = require('express');
 const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
+const reviewRouter = require('../routes/reviewRoutes');
 
 const router = express.Router();
+
+router.use('/:tourId/reviews', reviewRouter);
 
 // Make sure ID is valid and return error if not.
 // router.param('id', tourController.checkID);
@@ -18,6 +21,7 @@ router
   .route('/')
   .get(authController.protect, tourController.getAllTours)
   .post(tourController.createTour);
+
 router
   .route('/:id')
   .get(tourController.getTour)
