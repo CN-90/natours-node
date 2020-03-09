@@ -10,14 +10,22 @@ router.post('/login', authController.logIn);
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
 
-router.patch(
-  '/updatePassword',
-  authController.protect,
-  authController.updatePassword
-);
+// all routes beneath this are protected and must pass the protected handler
+router.use(authController.protect);
 
-router.patch('/updateMe', authController.protect, userController.updateMe);
-router.delete('/deleteMe', authController.protect, userController.deleteMe);
+router.patch('/updatePassword', authController.updatePassword);
+
+router.get(
+  '/me',
+
+  userController.getMe,
+  userController.getUser
+);
+router.patch('/updateMe', userController.updateMe);
+router.delete('/deleteMe', userController.deleteMe);
+
+// only admins will be able to perform these actions.
+router.use(authController.restrictTo('admin'));
 
 router
   .route('/')

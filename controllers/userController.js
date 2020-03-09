@@ -4,6 +4,18 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
 
+// get all users in database
+exports.getAllUsers = factory.getAll(User);
+
+// get a single user depending on id
+exports.getUser = factory.getOne(User);
+
+// updates an existing user (DO NOT UPDATE PASSWORDS WITH THIS)
+exports.updateUser = factory.updateOne(User);
+
+// deletes user depending on ID
+exports.deleteUser = factory.deleteOne(User);
+
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
   Object.keys(obj).forEach(el => {
@@ -14,18 +26,10 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-// get all users in database
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
-
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: {
-      users
-    }
-  });
-});
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   //  1) throw error if user POSTs password data
@@ -40,7 +44,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
   // filter out the body object to ensure that only name and email fields are able to be changed.
   const filteredBody = filterObj(req.body, 'name', 'email');
-  console.log(filteredBody);
   // 2) Update user document (new: true -- returns new updated version of the user.)
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
@@ -63,24 +66,10 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
-// get a single user depending on id
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    status: 'Error',
-    message: 'This route is not defined.'
-  });
-};
-
 // creates a new user and saves to database.
 exports.createUser = (req, res) => {
   res.status(500).json({
     status: 'Error',
-    message: 'This route is not defined.'
+    message: 'This route is not defined. Please use /Signup instead.'
   });
 };
-
-// updates an existing user (DO NOT UPDATE PASSWORDS WITH THIS)
-exports.updateUser = factory.updateOne(User);
-
-// deletes user depending on ID
-exports.deleteUser = factory.deleteOne(User);

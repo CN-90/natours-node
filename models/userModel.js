@@ -61,18 +61,18 @@ usersSchema.pre('save', async function(next) {
   next();
 });
 
-// only returns users where active is not equal ($ne) to false.
-usersSchema.pre(/^find/, function(next) {
-  // this points to the current query
-  this.find({ active: { $ne: false } });
-  next();
-});
-
 usersSchema.pre('save', function(next) {
   if (!this.isModified('password') || this.isNew) return next();
 
   // ensures token is always created after password has been changed.
   this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+// only returns users where active is not equal ($ne) to false.
+usersSchema.pre(/^find/, function(next) {
+  // this points to the current query
+  this.find({ active: { $ne: false } });
   next();
 });
 

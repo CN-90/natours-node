@@ -123,6 +123,10 @@ const toursSchema = new mongoose.Schema(
   }
 );
 
+// toursSchema.index({ price: 1 });
+toursSchema.index({ price: 1, ratingsAverage: -1 });
+toursSchema.index({ slug: 1 });
+
 // In Mongoose, a virtual is a property that is not stored in MongoDB. Virtuals are typically used for computed properties on documents.
 toursSchema.virtual('durationWeeks').get(function() {
   return this.duration / 7;
