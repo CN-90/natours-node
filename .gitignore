@@ -2,3 +2,4 @@
 /public/img
 /dev-data/img
 /config.env
+.cache

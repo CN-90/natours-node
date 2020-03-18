@@ -60,6 +60,16 @@ exports.logIn = catchAsync(async (req, res, next) => {
   createAndSendToken(user, 200, res);
 });
 
+exports.logout = (req, res) => {
+  console.log('Logout running.');
+  res.cookie('jwt', 'loggedOut', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  });
+
+  res.status(200).json({ status: 'Success' });
+};
+
 // protected routes
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Get token and check if it exists
@@ -69,6 +79,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
   // 2) Validate token throw error user is not logged
   if (!token) {
@@ -101,6 +113,35 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
+
+//only for rendered pages, no errors!
+exports.isLoggedIn = async (req, res, next) => {
+  if (req.cookies.jwt) {
+    try {
+      // Verify the token
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+      // 3) Check if user stills exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next();
+      }
+      // 4) Check if user changed passwords after the token was issued.
+      if (currentUser.changedPasswordAfter(decoded.iat)) {
+        return next();
+      }
+
+      // THERE IS A LOGGED IN USER
+      res.locals.user = currentUser; // allows the current user to be accessed in the pug templates.
+      return next();
+    } catch (err) {
+      return next();
+    }
+  }
+  next();
+};
 
 // wrapper function to access arguments using closure.
 exports.restrictTo = (...roles) => {
