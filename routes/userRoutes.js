@@ -5,6 +5,8 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
 
+// use multer to allow users to upload images.
+
 router.post('/signup', authController.signUp);
 router.post('/login', authController.logIn);
 router.get('/logout', authController.logout);
@@ -22,7 +24,11 @@ router.get(
   userController.getMe,
   userController.getUser
 );
-router.patch('/updateMe', userController.updateMe);
+router.patch(
+  '/updateMe',
+  userController.uploadUserPhoto,
+  userController.updateMe
+);
 router.delete('/deleteMe', userController.deleteMe);
 
 // only admins will be able to perform these actions.

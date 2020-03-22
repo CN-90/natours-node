@@ -1,8 +1,35 @@
+const multer = require('multer');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 // const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
+
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/img/users');
+  },
+  filename: (req, file, cb) => {
+    // user-5351sab2c5-3332434141.jpeg
+    const ext = file.mimetype.split('/')[1];
+    cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+  }
+});
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload an image.', 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+});
+
+exports.uploadUserPhoto = upload.single('photo');
 
 // get all users in database
 exports.getAllUsers = factory.getAll(User);
@@ -36,7 +63,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   if (req.body.password || req.body.passwordConfirm) {
     return next(
       new AppError(
-        'This route is not for password updates. Pleaes use updatePassword',
+        'This route is not for password updates. Please use updatePassword',
         400
       )
     );
@@ -44,6 +71,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
   // filter out the body object to ensure that only name and email fields are able to be changed.
   const filteredBody = filterObj(req.body, 'name', 'email');
+  if (req.file) filteredBody.photo = req.file.filename; // also update photo if photo is being updated.
   // 2) Update user document (new: true -- returns new updated version of the user.)
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
